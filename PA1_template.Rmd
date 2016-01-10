@@ -1,25 +1,137 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Reproducible Research Project 1"
+output: html_document
 ---
+1. LOADING AND PREPROCESSING DATA
 
+The required R packages are read into R:
 
-## Loading and preprocessing the data
+```{r}
+library(plyr)
+library(dplyr)
+library(ggplot2)
+```
 
+The data can be found in a zipped file at: https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip
+The data should be extracted and saved in the R working directory as activity.csv.
 
+The raw data are then read into R and saved as "data"
 
-## What is mean total number of steps taken per day?
+```{r}
+data <- read.csv("activity.csv")
+```
 
+The data set is then process to a useful format.
 
+```{r}
+data<-mutate(data,day=weekdays(as.Date(date,'%Y-%m-%d')))
+data<-mutate(data,v1=as.numeric(steps))
 
-## What is the average daily activity pattern?
+mydate<-data$date
+mydate<-as.Date(mydate, format = "%Y-%m-%d")
+data<-cbind(data,mydate)
 
+data<-select(data,v1,mydate,interval,day)
+data<-rename(data,steps=v1)
+data<-rename(data,date=mydate)
+```
 
+2. TOTAL, MEAN AND MEDIAN STEPS FOR EACH DAY
 
-## Imputing missing values
+The daily totals,and averages and median for each day's 5 minute interval are calculated:
 
+```{r}
+day.tot <- ddply(data, c("date"), summarise,
+                      sum  = sum(steps))
 
+day.mean <- ddply(data, c("date"), summarise,
+                 mean  = mean(steps))
 
-## Are there differences in activity patterns between weekdays and weekends?
+day.median <-ddply(data, c("date"), summarise,
+                   median  = median(steps))
+
+tot.mean.median<-cbind(day.tot,day.mean$mean,day.median$median)
+
+tot.mean.median
+```
+
+A histogram of the total daily steps is plotted:
+
+```{r, echo=TRUE}
+hist(day.tot$sum,xlab="Total Steps per Day",main="Histogram of Daily Steps")
+```
+
+3. AVERAGE DAILY ACTIVITY PATTERM
+
+A time series plot including NA (breaks in the line) data is shown below.
+
+```{r, echo=TRUE}
+plot(day.mean$date, day.mean$mean,type="l",xlab="Date",ylab="Average Daily Steps")
+```
+
+The 5 minute interval with the highest number of steps on averages is:
+
+```{r}
+comp.data<-data[complete.cases(data),]
+uncomp.data<-data[!complete.cases(data),]
+
+int.mean <- ddply(comp.data, c("interval"), summarise,
+                  mean  = mean(steps))
+
+arrange(int.mean,desc(mean))[1,]
+```
+
+4. IMPUTING MISSING VALUES
+Missing data (NAs) are replaced with the average values for the corresponding 5 minute interval.
+
+```{r}
+uncomp.data<-data[!complete.cases(data),]
+b<-merge(int.mean,uncomp.data,by="interval")
+b<-select(b,interval,mean,date,day)
+b<-rename(b,steps=mean)
+impute.data<-rbind(b,comp.data)
+```
+
+A histogram of daily step totals with the imputed data is given below:
+
+```{r, echo=TRUE}
+day.imptot <- ddply(impute.data, c("date"), summarise,
+                 sum  = sum(steps))
+
+hist(day.imptot$sum,main="Histogram of Steps After Imputing Missing Data",xlab="Total Daily Steps")
+```
+
+Using the average steps for each interval leads to the following means and medians for each day.
+
+```{r}
+day.impmean <- ddply(impute.data, c("date"), summarise,
+                    mean  = mean(steps))
+
+day.impmedian <- ddply(impute.data, c("date"), summarise,
+                    median  = median(steps))
+com.imp<-cbind(day.impmean,day.impmedian$median)
+com.imp
+```
+
+The median values given for days with many missing data points are inflated. A better imputing stategy should be considered.
+Totals for and means are slightly changed by imputing values for missing data.
+
+5. WEEKDAY AND WEEKEND VALUES
+
+```{r,echo=TRUE}
+wend<-subset(impute.data,day=="Sunday"|day=="Saturday")
+wday<-subset(impute.data,day=="Monday"|day=="Tuesday"|day=="Wednesday"|day=="Thursday"|day=="Friday")
+
+we<-ddply(wend,c("interval"),summarise,
+          mean = mean(steps))
+wd<-ddply(wday,c("interval"),summarise,
+          mean = mean(steps))
+
+weekend<-mutate(we,wk="Weekend")
+weekday<-mutate(wd,wk="Weekday")
+
+wkdata<-rbind(weekend,weekday)
+
+qplot(interval,mean,data=wkdata,geom=c("line"),facets=.~wk)
+```
+
