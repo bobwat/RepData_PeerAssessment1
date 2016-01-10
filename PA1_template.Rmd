@@ -1,8 +1,10 @@
 ---
 title: "Reproducible Research Project 1"
-output: html_document
+output:
+  html_document:
+    keep_md: yes
 ---
-LOADING AND PREPROCESSING DATA
+1. LOADING AND PREPROCESSING DATA
 
 The required R packages are read into R:
 
@@ -35,7 +37,8 @@ data<-select(data,v1,mydate,interval,day)
 data<-rename(data,steps=v1)
 data<-rename(data,date=mydate)
 ```
-TOTAL, MEAN AND MEDIAN STEPS FOR EACH DAY
+
+2. TOTAL, MEAN AND MEDIAN STEPS FOR EACH DAY
 
 The daily totals,and averages and median for each day's 5 minute interval are calculated:
 
@@ -60,7 +63,7 @@ A histogram of the total daily steps is plotted:
 hist(day.tot$sum,xlab="Total Steps per Day",main="Histogram of Daily Steps")
 ```
 
-AVERAGE DAILY ACTIVITY PATTERM
+3. AVERAGE DAILY ACTIVITY PATTERM
 
 A time series plot including NA (breaks in the line) data is shown below.
 
@@ -80,8 +83,7 @@ int.mean <- ddply(comp.data, c("interval"), summarise,
 arrange(int.mean,desc(mean))[1,]
 ```
 
-IMPUTING MISSING VALUES
-
+4. IMPUTING MISSING VALUES
 Missing data (NAs) are replaced with the average values for the corresponding 5 minute interval.
 
 ```{r}
@@ -116,7 +118,7 @@ com.imp
 The median values given for days with many missing data points are inflated. A better imputing stategy should be considered.
 Totals for and means are slightly changed by imputing values for missing data.
 
-WEEKDAY AND WEEKEND VALUES
+5. WEEKDAY AND WEEKEND VALUES
 
 ```{r,echo=TRUE}
 wend<-subset(impute.data,day=="Sunday"|day=="Saturday")
