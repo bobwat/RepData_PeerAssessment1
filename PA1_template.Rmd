@@ -81,6 +81,7 @@ arrange(int.mean,desc(mean))[1,]
 ```
 
 IMPUTING MISSING VALUES
+
 Missing data (NAs) are replaced with the average values for the corresponding 5 minute interval.
 
 ```{r}
