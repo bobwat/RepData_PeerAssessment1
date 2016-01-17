@@ -1,4 +1,9 @@
-# Reproducible Research Project 1
+--- 
+title: "Reproducible Research Project 1"
+output:
+  html_document:
+    keep_md: yes
+---
 1. LOADING AND PREPROCESSING DATA
 
 The required R packages are read into R:
@@ -150,6 +155,7 @@ hist(day.tot$sum,xlab="Total Steps per Day",main="Histogram of Daily Steps")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
 
 3. AVERAGE DAILY ACTIVITY PATTERM
 

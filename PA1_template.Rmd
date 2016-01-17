@@ -1,3 +1,8 @@
+---
+output:
+  html_document:
+    keep_md: yes
+---
 --- 
 title: "Reproducible Research Project 1"
 output:
@@ -62,6 +67,7 @@ A histogram of the total daily steps is plotted:
 ```{r, echo=TRUE}
 hist(day.tot$sum,xlab="Total Steps per Day",main="Histogram of Daily Steps")
 ```
+
 
 3. AVERAGE DAILY ACTIVITY PATTERM
 
